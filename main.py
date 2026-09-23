@@ -16,7 +16,7 @@ def lawn_x(x):
     center_x=right_x-CELL_WIDTH/2
     return center_x, column
 def lawn_y(y):
-    top_y=250+CELL_HEIGHT
+    top_y=25+CELL_HEIGHT
     row=1
     while top_y<=y :
         top_y=top_y+CELL_HEIGHT
@@ -33,6 +33,7 @@ class MyGame(arcade.Window):
 
         self.seed=None
         self.plants=SpriteList()
+        self.suns_list=SpriteList()
         self.lawns=[]
         self.suns=150
 
@@ -44,6 +45,7 @@ class MyGame(arcade.Window):
         arcade.draw_texture_rectangle(67,SCREEN_HEIGHT/2,134,SCREEN_HEIGHT,self.menu_picture)
         arcade.draw_text(f"{self.suns}",30,490,(0,0,0),30)
         self.plants.draw()
+        self.suns_list.draw()
         if self.seed != None:
             self.seed.draw()
 
@@ -51,12 +53,15 @@ class MyGame(arcade.Window):
     def update(self, delta_time):
         self.plants.update()
         self.plants.update_animation(delta_time)
+        for plant in self.plants:
+            if isinstance(plant, Plants.Sunflower):
+                plant.update_sun(delta_time)
     def on_mouse_press(self, x, y, button, key_modifiers):
         print(x,y)
         if 16<=x<=111:
             if 375<=y<=475:
                 print("sunflower")
-                self.seed=Plants.Sunflower()
+                self.seed=Plants.Sunflower(self.suns_list)
 
             if 263<=y<=363:
                 print("peashooter")
