@@ -1,8 +1,10 @@
 from arcade import SpriteList
 from arcade.examples.nested_loops_bottom_left_triangle import column
-
+import Zombies
 import Plants
 import arcade
+import time
+import random
 from arcade.gui.examples.anchor_widgets import window
 
 from Constant import *
@@ -32,11 +34,13 @@ class MyGame(arcade.Window):
         self.plants_sound=arcade.load_sound("Sounds/seed.mp3")
 
         self.seed=None
+        self.zombies_list=SpriteList()
         self.plants=SpriteList()
         self.suns_list=SpriteList()
+        self.bullets_list=SpriteList()
         self.lawns=[]
         self.suns=150
-
+        self.zombie_timer=time.time()
         self.setup()
     def setup(self):
         pass
@@ -46,25 +50,37 @@ class MyGame(arcade.Window):
         arcade.draw_text(f"{self.suns}",30,490,(0,0,0),30)
         self.plants.draw()
         self.suns_list.draw()
+        self.zombies_list.draw()
+        self.bullets_list.draw()
+
         if self.seed != None:
             self.seed.draw()
 
 
+
     def update(self, delta_time):
         self.plants.update()
+        self.zombies_list.update()
         self.plants.update_animation(delta_time)
+        self.bullets_list.update()
+        self.zombies_list.update_animation(delta_time)
         for plant in self.plants:
             if isinstance(plant, Plants.Sunflower):
-                plant.update_sun(delta_time)
+                plant.update()
+        if time.time() - self.zombie_timer > 3:
+            center_y,row=lawn_y(random.randint(25,520))
+            self.zombies_list.append(Zombies.Ordinare_Zombie(center_y,row))
+            self.zombie_timer=time.time()
     def on_mouse_press(self, x, y, button, key_modifiers):
         print(x,y)
         if 16<=x<=111:
             if 375<=y<=475:
                 print("sunflower")
-                self.seed=Plants.Sunflower(self.suns_list)
+                self.seed=Plants.Sunflower(self)
 
             if 263<=y<=363:
                 print("peashooter")
+                self.seed=Plants.Peashooter(self)
             if 146<=y<=246:
                 print("wallnut")
             if 31<=y<=132:
@@ -72,6 +88,11 @@ class MyGame(arcade.Window):
         if self.seed!=None:
             self.seed.set_position(x,y)
             self.seed.alpha=150
+        for sun in self.suns_list:
+            if  sun.left<=x<=sun.right and sun.bottom<=y<=sun.top:
+                self.suns+=sun.value
+                sun.kill()
+
 
 
 

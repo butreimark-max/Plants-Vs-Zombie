@@ -1,5 +1,11 @@
 import arcade
 import Animation
+import  Suns
+import time
+
+from Constant import CELL_WIDTH, SCREEN_WIDTH
+
+
 class Plant(Animation.Animation):
     def __init__(self,image,hp,price):
         super().__init__(image,scale=0.12)
@@ -19,32 +25,61 @@ class Plant(Animation.Animation):
         self.col=col
 
 class Sunflower(Plant):
-    def __init__(self,sun_list):
+    def __init__(self,window):
         super().__init__("Pictures/plants/sun1.png",50,50)
         self.append_texture(arcade.load_texture("Pictures/plants/sun1.png"))
         self.append_texture(arcade.load_texture("Pictures/plants/sun2.png"))
-        self.sun_list = sun_list
+        self.window=window
 
-    def update_sun(self,delta_time):
-        self.timer+=delta_time
-
-
-        if self.timer>=3:
-
-            sun = Sun(self.center_x, self.center_y + 30)
-            self.sun_list.append(sun)
-            self.timer=0
+        self.timer+=time.time()
+    def update(self):
+        super().update()
 
 
+        if time.time()-self.timer> 15:
+
+
+            sun = Suns.Sun(self.center_x+30, self.center_y - 30)
+            self.window.suns_list.append(sun)
+            self.timer=time.time()
+        self.window.suns_list.update()
+class Peashooter(Plant):
+    def __init__(self,window):
+        super().__init__("Pictures/plants/pea1.png",75,100)
+        for i in range(1,4):
+            self.append_texture(arcade.load_texture(f"Pictures/plants/pea{i}.png"))
+        self.window=window
+        self.timer=time.time()
+    def update(self):
+        super().update()
+        zombie_on_line=False
+        if time.time()-self.timer> 2 and zombie_on_line:
+            new_bullet = Bullet(self.right,self.top)
+            self.window.bullets_list.append(new_bullet)
+            self.timer=time.time()
+
+class Bullet(arcade.Sprite):
+    def __init__(self,center_x,center_y):
+        super().__init__("Pictures/items/bul.png",0.12)
+        self.set_position(center_x,center_y)
+        self.change_x=7
+        self.damege=1
+
+    def update(self):
+        self.center_x+=self.change_x
+        if self.center_x>SCREEN_WIDTH:
+            self.kill()
 
 
 
-class Sun (arcade.Sprite):
-    def __init__(self,x,y):
-        super().__init__("Pictures/items/sun.png",0.1)
-        self.value=25
-        self.center_x=x
-        self.center_y=y
+
+
+
+
+
+
+
+
 
 
 
