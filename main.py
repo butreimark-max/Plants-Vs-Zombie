@@ -69,7 +69,13 @@ class MyGame(arcade.Window):
                 plant.update()
         if time.time() - self.zombie_timer > 3:
             center_y,row=lawn_y(random.randint(25,520))
-            self.zombies_list.append(Zombies.Ordinare_Zombie(center_y,row))
+            zombie_type=random.randint(1,3)
+            if zombie_type==1:
+                self.zombies_list.append(Zombies.Ordinare_Zombie(row,center_y+10,self))
+            elif zombie_type == 2:
+                self.zombies_list.append(Zombies.Conehead_Zombie(row, center_y + 10, self))
+            elif zombie_type == 3:
+                self.zombies_list.append(Zombies.Backethead_Zombie(row, center_y + 10, self))
             self.zombie_timer=time.time()
     def on_mouse_press(self, x, y, button, key_modifiers):
         print(x,y)
@@ -83,6 +89,7 @@ class MyGame(arcade.Window):
                 self.seed=Plants.Peashooter(self)
             if 146<=y<=246:
                 print("wallnut")
+                self.seed=Plants.Nut(self)
             if 31<=y<=132:
                 print("torch tree")
         if self.seed!=None:
