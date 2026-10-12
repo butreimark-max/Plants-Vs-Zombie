@@ -1,7 +1,8 @@
 import arcade
 import Animation
 import Constant
-from Constant import SCREEN_WIDTH
+from Constant import SCREEN_WIDTH, LEFT_SIGHT
+
 
 
 class Zombie(Animation.Animation):
@@ -14,19 +15,22 @@ class Zombie(Animation.Animation):
         self.eating=False
         self.window=window
     def update(self):
+
         if not self.eating:
             self.center_x-=self.change_x
-        self.eating=False
         food=arcade.check_for_collision_with_list(self,self.window.plants)
+        self.eating=False
         for plant in food:
             if self.row==plant.row:
                 self.eating=True
                 plant.hp-=0.3
-
-
-
+        if not self.eating:
+            self.center_x -= 0.1
         if self.hp<=0:
             self.kill()
+        if self.center_x <= LEFT_SIGHT:
+            self.window.game=False
+
 
 class Ordinare_Zombie(Zombie):
     def __init__(self,row,center_y,window):

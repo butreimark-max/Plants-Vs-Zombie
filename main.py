@@ -29,6 +29,7 @@ class MyGame(arcade.Window):
     def __init__(self, width, height, title):
         super().__init__(width,height,title)
         """Background image"""
+        self.ending=arcade.load_texture("Pictures/textures/end.png")
         self.bg_picture=arcade.load_texture("Pictures/textures/background.jpg")
         self.menu_picture=arcade.load_texture("Pictures/textures/menu_vertical.png")
         self.plants_sound=arcade.load_sound("Sounds/seed.mp3")
@@ -39,12 +40,15 @@ class MyGame(arcade.Window):
         self.suns_list=SpriteList()
         self.bullets_list=SpriteList()
         self.lawns=[]
-        self.suns=150
+        self.suns=400
         self.zombie_timer=time.time()
+        self.game=True
+        self.fire_tree_list=SpriteList()
         self.setup()
     def setup(self):
         pass
     def on_draw(self):
+
         arcade.draw_texture_rectangle(SCREEN_WIDTH/2,SCREEN_HEIGHT/2,SCREEN_WIDTH,SCREEN_HEIGHT,self.bg_picture)
         arcade.draw_texture_rectangle(67,SCREEN_HEIGHT/2,134,SCREEN_HEIGHT,self.menu_picture)
         arcade.draw_text(f"{self.suns}",30,490,(0,0,0),30)
@@ -55,28 +59,40 @@ class MyGame(arcade.Window):
 
         if self.seed != None:
             self.seed.draw()
+        if not self.game:
+            arcade.draw_texture_rectangle(SCREEN_WIDTH/2+60,SCREEN_HEIGHT/2,564,468,self.ending)
 
 
 
     def update(self, delta_time):
-        self.plants.update()
-        self.zombies_list.update()
-        self.plants.update_animation(delta_time)
-        self.bullets_list.update()
-        self.zombies_list.update_animation(delta_time)
-        for plant in self.plants:
-            if isinstance(plant, Plants.Sunflower):
-                plant.update()
-        if time.time() - self.zombie_timer > 3:
-            center_y,row=lawn_y(random.randint(25,520))
-            zombie_type=random.randint(1,3)
-            if zombie_type==1:
-                self.zombies_list.append(Zombies.Ordinare_Zombie(row,center_y+10,self))
-            elif zombie_type == 2:
-                self.zombies_list.append(Zombies.Conehead_Zombie(row, center_y + 10, self))
-            elif zombie_type == 3:
-                self.zombies_list.append(Zombies.Backethead_Zombie(row, center_y + 10, self))
-            self.zombie_timer=time.time()
+        if self.game:
+            self.plants.update()
+            self.zombies_list.update()
+            self.plants.update_animation(delta_time)
+            self.bullets_list.update()
+            self.zombies_list.update_animation(delta_time)
+
+            for plant in self.plants:
+                if isinstance(plant, Plants.Sunflower):
+                    plant.update()
+            if time.time() - self.zombie_timer > 3:
+                self.ramdom_spawn()
+    def ramdom_spawn(self):
+        zombies = [
+            Zombies.Ordinare_Zombie,
+            Zombies.Conehead_Zombie,
+            Zombies.Backethead_Zombie
+        ]
+
+        weights = [70, 20, 10]
+        chosen = random.choices(zombies, weights=weights, k=1)[0]
+
+        center_y, row = lawn_y(random.randint(25, 520))
+
+        zombie = chosen(row, center_y, self)
+        self.zombies_list.append(zombie)
+
+        self.zombie_timer = time.time()
     def on_mouse_press(self, x, y, button, key_modifiers):
         print(x,y)
         if 16<=x<=111:
@@ -92,6 +108,7 @@ class MyGame(arcade.Window):
                 self.seed=Plants.Nut(self)
             if 31<=y<=132:
                 print("torch tree")
+                self.seed=Plants.Fire_Tree(self)
         if self.seed!=None:
             self.seed.set_position(x,y)
             self.seed.alpha=150
